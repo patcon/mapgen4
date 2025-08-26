@@ -5,9 +5,19 @@ function createConstraintGrid(scatterData, gridSize = 128) {
     // Extract only the coordinates, ignoring the ID
     const points = scatterData.map(([id, [x, y]]) => [x, y]);
     
-    // Find data bounds
-    const xExtent = [Math.min(...points.map(p => p[0])), Math.max(...points.map(p => p[0]))];
-    const yExtent = [Math.min(...points.map(p => p[1])), Math.max(...points.map(p => p[1]))];
+    // Find data bounds with buffer padding
+    const rawXExtent = [Math.min(...points.map(p => p[0])), Math.max(...points.map(p => p[0]))];
+    const rawYExtent = [Math.min(...points.map(p => p[1])), Math.max(...points.map(p => p[1]))];
+    
+    // Add 15% buffer on each side to prevent points from being too close to edges
+    const bufferPercent = 0.15;
+    const xRange = rawXExtent[1] - rawXExtent[0];
+    const yRange = rawYExtent[1] - rawYExtent[0];
+    const xBuffer = xRange * bufferPercent;
+    const yBuffer = yRange * bufferPercent;
+    
+    const xExtent = [rawXExtent[0] - xBuffer, rawXExtent[1] + xBuffer];
+    const yExtent = [rawYExtent[0] - yBuffer, rawYExtent[1] + yBuffer];
     
     // Create initial density grid with higher resolution for smoother interpolation
     const highResSize = gridSize * 2; // Use 2x resolution for better interpolation
