@@ -3,12 +3,11 @@ import { contours } from 'd3-contour';
 
 // Extended levels for our terrain mapping
 const TERRAIN_LEVELS = {
-    deepOcean: -0.35,           // Very low point density -> deep ocean
-    ocean:     -0.25,     // -0.25 not used right now
-    shallow:   -0.05,   // -0.05
+    deepOcean: -0.40,           // Very low point density -> deep ocean
+    // ocean:     -0.25,     // -0.25 not used right now
+    // shallow:   -0.05,   // -0.05
     valley:    +0.05,    // +0.05
     mountain:  1.0,            // High density -> mountains (capped lower than +1.0)
-    // mountain:  0.40,            // High density -> mountains (capped lower than +1.0)
 };
   
 function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY = true) {
