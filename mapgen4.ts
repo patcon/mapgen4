@@ -220,4 +220,26 @@ function main({mesh, t_peaks}: { mesh: Mesh; t_peaks: number[]; }) {
     if (downloadButton) downloadButton.addEventListener('click', download);
 }
 
+function exportTerrain() {  
+    const terrainData = {  
+        size: Painting.size,  
+        constraints: Array.from(Painting.constraints), // Convert Float32Array to regular array  
+        seed: param.elevation.seed,  
+        island: param.elevation.island,  
+        userHasPainted: Painting.userHasPainted()  
+    };  
+      
+    const dataStr = JSON.stringify(terrainData, null, 2);  
+    const blob = new Blob([dataStr], {type: 'application/json'});  
+      
+    let a = document.createElement('a');  
+    a.href = URL.createObjectURL(blob);  
+    a.setAttribute('download', `mapgen4-terrain-${param.elevation.seed}.json`);  
+    a.click();  
+}  
+  
+// Add event listener  
+const exportButton = document.getElementById('button-export-terrain');  
+if (exportButton) exportButton.addEventListener('click', exportTerrain);
+
 makeMesh().then(main);
