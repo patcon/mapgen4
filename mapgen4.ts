@@ -69,6 +69,11 @@ const initialParams = {
  */
 function main({mesh, t_peaks}: { mesh: Mesh; t_peaks: number[]; }) {
     let render = new Renderer(mesh);
+    
+    // Expose globals for CLI script access
+    (window as any).render = render;
+    (window as any).param = param;
+    (window as any).Painting = Painting;
 
     /* set initial parameters */
     for (let phase of ['elevation', 'biomes', 'rivers', 'render']) {
@@ -224,6 +229,9 @@ function main({mesh, t_peaks}: { mesh: Mesh; t_peaks: number[]; }) {
     let working = false;
     let workRequested = false;
     let elapsedTimeHistory = [];
+    
+    // Expose worker and generate function globally for CLI script access
+    (window as any).worker = worker;
 
     worker.addEventListener('messageerror', event => {
         console.log("WORKER ERROR", event);
@@ -281,6 +289,9 @@ function main({mesh, t_peaks}: { mesh: Mesh; t_peaks: number[]; }) {
             workRequested = true;
         }
     }
+    
+    // Expose generate function globally for CLI script access
+    (window as any).generate = generate;
 
     worker.postMessage({mesh, t_peaks, param});
     generate();

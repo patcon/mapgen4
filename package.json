@@ -4,7 +4,8 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "start": "sh build.sh && npx serve ."
+        "start": "sh build.sh && npx serve .",
+        "import-png": "node cli-import-download.js"
     },
     "dependencies": {
         "@redblobgames/prng": "https://github.com/redblobgames/prng",
@@ -14,6 +15,8 @@
         "flatqueue": "^2",
         "gl-matrix": "^3",
         "regl": "^1",
-        "simplex-noise": "^4"
+        "simplex-noise": "^4",
+        "puppeteer": "^22.0.0",
+        "mime-types": "^2.1.35"
     }
 }
