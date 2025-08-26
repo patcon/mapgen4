@@ -5,3 +5,4 @@ blog/
 /exports/*
 /outputs/*
 !*/.gitkeep
+.DS_Store
