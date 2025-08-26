@@ -30,10 +30,11 @@ function createMapgenServer(port = 0) {
                 // Remove query parameters
                 filePath = filePath.split('?')[0];
                 
-                filePath = path.join(__dirname, filePath);
+                filePath = path.join(__dirname, '..', filePath);
                 
                 // Security check - ensure we're serving from the project directory
-                if (!filePath.startsWith(__dirname)) {
+                const projectRoot = path.resolve(__dirname, '..');
+                if (!filePath.startsWith(projectRoot)) {
                     console.log(`403 Forbidden: ${req.url}`);
                     res.writeHead(403);
                     res.end('Forbidden');
@@ -323,7 +324,7 @@ async function main() {
     }
 
     // Check if embed.html exists
-    const embedPath = path.resolve(__dirname, 'embed.html');
+    const embedPath = path.resolve(__dirname, '..', 'embed.html');
     try {
         await fs.access(embedPath);
     } catch (error) {
