@@ -1,5 +1,23 @@
 import * as fs from 'fs';
 import { contours } from 'd3-contour';
+
+// Elevation breakpoints from painting.ts TOOLS constants
+const ELEVATION_LEVELS = {
+    ocean:    -0.25,  // Deep water
+    shallow:  -0.05,  // Shallow water/coast
+    valley:   +0.05,  // Low terrain/valleys
+    mountain: +1.0,   // Mountain peaks
+};
+
+// Extended levels for our terrain mapping
+const TERRAIN_LEVELS = {
+    deepOcean: -0.40,           // Very low point density -> deep ocean
+    ocean:     ELEVATION_LEVELS.ocean,     // -0.25
+    shallow:   ELEVATION_LEVELS.shallow,   // -0.05
+    valley:    ELEVATION_LEVELS.valley,    // +0.05
+    hills:     0.30,            // Moderate density -> hills
+    mountain:  0.40,            // High density -> mountains (capped lower than +1.0)
+};
   
 function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY = true) {
     // Extract only the coordinates, ignoring the ID
@@ -96,31 +114,42 @@ function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY 
                 density = d0 * (1 - fracY) + d1 * fracY;
             }
             
-            // Convert density to elevation (-0.25 to 0.75 range)
+            // ELEVATION TERRAIN MAPPING (using constants from painting.ts TOOLS):
+            // -0.35 to -0.25: Deep Ocean (very low point density)
+            // -0.25 to -0.05: Ocean (ELEVATION_LEVELS.ocean to ELEVATION_LEVELS.shallow)
+            // -0.05 to  0.00: Shallow Water/Coast (ELEVATION_LEVELS.shallow to sea level)
+            //  0.00 to +0.05: Plains (sea level to ELEVATION_LEVELS.valley - most terrain settles here)
+            // +0.05 to +0.30: Low Hills/Valleys (ELEVATION_LEVELS.valley to hills)
+            // +0.30 to +0.75: Hills to Mountains (moderate to high density)
+            
+            // Convert density to elevation range
             // Higher density = land (positive), lower density = water (negative)
             const maxDensity = 3.0; // Adjusted for smoother transitions
             let normalizedDensity = Math.max(0, Math.min(1, density / maxDensity));
             
-            // Apply very aggressive scaling to push most values down to ~0.05
+            // Apply very aggressive scaling to push most values down to valley level
             // Use a high power function to create extreme contrast
-            const scalingPower = 6.0; // Much higher power for extreme scaling
+            const scalingPower = 5.0; // Much higher power for extreme scaling
             let scaledDensity = Math.pow(normalizedDensity, scalingPower);
             
-            // Scale to a smaller range: most terrain at ~0.05, peaks at 0.75
-            // Convert from 0-1 scaled density to 0.05-0.75 elevation range
-            let elevation = scaledDensity * 0.70 + 0.05; // Maps 0->0.05, 1->0.75
+            // Scale to terrain range: most terrain at valley level, peaks at mountain level
+            // Convert from 0-1 scaled density to valley-mountain elevation range
+            const elevationRange = TERRAIN_LEVELS.mountain - TERRAIN_LEVELS.valley;
+            let elevation = scaledDensity * elevationRange + TERRAIN_LEVELS.valley; // Maps 0->valley (+0.05), 1->mountain (+0.75)
             
-            // For areas with very low density, push them to water (negative values)
+            // For areas with very low density, push them to water levels
             if (normalizedDensity < 0.1) {
-                elevation = normalizedDensity * 0.3 - 0.25; // Very low density becomes water
+                // Map very low density to deep ocean
+                const waterRange = TERRAIN_LEVELS.valley - TERRAIN_LEVELS.deepOcean;
+                elevation = normalizedDensity * waterRange + TERRAIN_LEVELS.deepOcean; // Very low density -> Deep Ocean (-0.35)
             }
             
             // Apply smoothing based on contour data for more natural coastlines
             const contourInfluence = getContourInfluence(contourData, x, y, gridSize, highResSize);
             elevation = elevation * 0.8 + contourInfluence * 0.2; // Reduce contour influence
             
-            // Clamp to valid range (-0.25 to 0.75)
-            elevation = Math.max(-0.25, Math.min(0.75, elevation));
+            // Clamp to valid terrain range (Deep Ocean to Mountains)
+            elevation = Math.max(TERRAIN_LEVELS.deepOcean, Math.min(TERRAIN_LEVELS.mountain, elevation));
             
             constraints[index] = elevation;
         }
