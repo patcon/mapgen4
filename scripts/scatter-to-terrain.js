@@ -15,7 +15,7 @@ const TERRAIN_LEVELS = {
     ocean:     ELEVATION_LEVELS.ocean,     // -0.25
     shallow:   ELEVATION_LEVELS.shallow,   // -0.05
     valley:    ELEVATION_LEVELS.valley,    // +0.05
-    mountain:  0.55,            // High density -> mountains (capped lower than +1.0)
+    mountain:  1.0,            // High density -> mountains (capped lower than +1.0)
     // mountain:  0.40,            // High density -> mountains (capped lower than +1.0)
 };
   
@@ -123,12 +123,12 @@ function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY 
             
             // Convert density to elevation range
             // Higher density = land (positive), lower density = water (negative)
-            const maxDensity = 3.0; // Adjusted for smoother transitions
+            const maxDensity = 25.0; // Adjusted for smoother transitions
             let normalizedDensity = Math.max(0, Math.min(1, density / maxDensity));
             
             // Apply very aggressive scaling to push most values down to valley level
             // Use a high power function to create extreme contrast
-            const scalingPower = 12.0; // Much higher power for extreme scaling
+            const scalingPower = 2.0; // Much higher power for extreme scaling
             let scaledDensity = Math.pow(normalizedDensity, scalingPower);
             
             // Scale to terrain range: most terrain at valley level, peaks at mountain level
