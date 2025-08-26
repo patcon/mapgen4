@@ -1,20 +1,12 @@
 import * as fs from 'fs';
 import { contours } from 'd3-contour';
 
-// Elevation breakpoints from painting.ts TOOLS constants
-const ELEVATION_LEVELS = {
-    ocean:    -0.25,  // Deep water
-    shallow:  -0.05,  // Shallow water/coast
-    valley:   +0.05,  // Low terrain/valleys
-    mountain: +1.0,   // Mountain peaks
-};
-
 // Extended levels for our terrain mapping
 const TERRAIN_LEVELS = {
-    deepOcean: -0.40,           // Very low point density -> deep ocean
-    ocean:     ELEVATION_LEVELS.ocean,     // -0.25
-    shallow:   ELEVATION_LEVELS.shallow,   // -0.05
-    valley:    ELEVATION_LEVELS.valley,    // +0.05
+    deepOcean: -0.35,           // Very low point density -> deep ocean
+    ocean:     -0.25,     // -0.25 not used right now
+    shallow:   -0.05,   // -0.05
+    valley:    +0.05,    // +0.05
     mountain:  1.0,            // High density -> mountains (capped lower than +1.0)
     // mountain:  0.40,            // High density -> mountains (capped lower than +1.0)
 };
@@ -77,6 +69,18 @@ function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY 
         }
     }
     
+    // Auto-detect peak density from the calculated density grid
+    let maxDensity = 0;
+    for (let i = 0; i < densityGrid.length; i++) {
+        maxDensity = Math.max(maxDensity, densityGrid[i]);
+    }
+    
+    // Add a small buffer to prevent edge cases where max density is at the boundary
+    let DENSITY_CEILING_SCALING_FACTOR = 0.7
+    maxDensity = maxDensity * DENSITY_CEILING_SCALING_FACTOR;
+    
+    console.log(`Auto-detected peak density: ${maxDensity.toFixed(2)}`);
+    
     // Use d3-contour to generate smooth contours
     const contourGenerator = contours()
         .size([highResSize, highResSize])
@@ -114,16 +118,8 @@ function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY 
                 density = d0 * (1 - fracY) + d1 * fracY;
             }
             
-            // ELEVATION TERRAIN MAPPING (using constants from painting.ts TOOLS):
-            // -0.35 to -0.25: Deep Ocean (very low point density)
-            // -0.25 to -0.05: Ocean (ELEVATION_LEVELS.ocean to ELEVATION_LEVELS.shallow)
-            // -0.05 to  0.00: Shallow Water/Coast (ELEVATION_LEVELS.shallow to sea level)
-            //  0.00 to +0.05: Plains (sea level to ELEVATION_LEVELS.valley - most terrain settles here)
-            // +0.30 to +0.75: Hills to Mountains (moderate to high density)
-            
-            // Convert density to elevation range
+            // Convert density to elevation range using auto-detected peak density
             // Higher density = land (positive), lower density = water (negative)
-            const maxDensity = 25.0; // Adjusted for smoother transitions
             let normalizedDensity = Math.max(0, Math.min(1, density / maxDensity));
             
             // Apply very aggressive scaling to push most values down to valley level
