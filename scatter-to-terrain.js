@@ -99,7 +99,15 @@ function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY 
             // Convert density to elevation (-0.25 to 1 range)
             // Higher density = land (positive), lower density = water (negative)
             const maxDensity = 3.0; // Adjusted for smoother transitions
-            let elevation = (density / maxDensity) * 2 - 1;
+            let normalizedDensity = Math.max(0, Math.min(1, density / maxDensity));
+            
+            // Apply aggressive scaling to push most values down to ~0.10 while preserving peaks
+            // Use a power function to create dramatic contrast
+            const scalingPower = 3.5; // Higher values create more dramatic scaling
+            let scaledDensity = Math.pow(normalizedDensity, scalingPower);
+            
+            // Convert to elevation range, with baseline around 0.10 for land areas
+            let elevation = scaledDensity * 2 - 1;
             
             // Apply smoothing based on contour data for more natural coastlines
             const contourInfluence = getContourInfluence(contourData, x, y, gridSize, highResSize);
