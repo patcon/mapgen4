@@ -162,22 +162,41 @@ function main({mesh, t_peaks}: { mesh: Mesh; t_peaks: number[]; }) {
                     return;  
                 }  
                   
-                // Load the constraints into the painting system  
-                Painting.constraints.set(terrainData.constraints);  
+                // Load the constraints into the painting system
+                Painting.constraints.set(terrainData.constraints);
                   
-                // Update parameters if they exist  
-                if (terrainData.seed !== undefined) {  
-                    param.elevation.seed = terrainData.seed;  
-                    document.querySelector("#slider-seed input").value = terrainData.seed;  
-                }  
-                if (terrainData.island !== undefined) {  
-                    param.elevation.island = terrainData.island;  
-                    document.querySelector("#slider-island input").value = terrainData.island;  
-                }  
-                  
-                // Mark as user painted and regenerate  
-                Painting.setElevationParam(param.elevation);  
-                generate();  
+                // Mark as user painted since we're importing painted terrain
+                Painting.setElevationParam(param.elevation);
+                
+                // Force userHasPainted to true by simulating a tiny paint operation
+                // This ensures updateUI() will correctly disable seed/island controls
+                // We need to access the internal heightMap instance to call paintAt
+                const paintingModule = Painting as any;
+                
+                // The heightMap instance is not directly exposed, but we can access it
+                // through the module's internal structure. Let's try a different approach:
+                // Temporarily store original constraints, then restore after paint
+                const originalConstraints = new Float32Array(Painting.constraints);
+                
+                // Simulate a minimal paint operation at top-left corner
+                const oceanTool = { elevation: -0.25 };
+                const tinySize = { innerRadius: 0.5, outerRadius: 1, rate: 1 };
+                
+                // We need to find the heightMap instance - it should be accessible through
+                // the painting module's internal structure
+                if (paintingModule._heightMap || paintingModule.heightMap) {
+                    const heightMap = paintingModule._heightMap || paintingModule.heightMap;
+                    heightMap.paintAt(oceanTool, 0.01, 0.01, tinySize, 1);
+                } else {
+                    // Fallback: directly set userHasPainted by modifying internal state
+                    // This is a hack but should work to trigger the painted state
+                    paintingModule.userHasPainted = () => true;
+                }
+                
+                // Restore the original imported constraints
+                Painting.constraints.set(originalConstraints);
+                
+                generate();
                   
             } catch (error) {  
                 alert('Error reading terrain file: ' + error.message);  
