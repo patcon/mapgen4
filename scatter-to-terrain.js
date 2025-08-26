@@ -39,13 +39,13 @@ function createConstraintGrid(scatterData, gridSize = 128) {
                 }  
             }  
               
-            // Convert density to elevation (-1 to 1 range)  
+            // Convert density to elevation (-0.25 to 1 range)  
             // Higher density = land (positive), lower density = water (negative)  
             const maxDensity = 5.0; // Adjust this to control island size  
             let elevation = (density / maxDensity) * 2 - 1;  
               
             // Clamp to valid range  
-            elevation = Math.max(-1, Math.min(1, elevation));  
+            elevation = Math.max(-0.25, Math.min(1, elevation));  
               
             constraints[index] = elevation;  
         }  
