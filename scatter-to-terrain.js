@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { contours } from 'd3-contour';
   
-function createConstraintGrid(scatterData, gridSize = 128) {
+function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY = true) {
     // Extract only the coordinates, ignoring the ID
     const points = scatterData.map(([id, [x, y]]) => [x, y]);
     
@@ -29,8 +29,12 @@ function createConstraintGrid(scatterData, gridSize = 128) {
             const index = y * highResSize + x;
             
             // Map grid coordinates to data space
-            const worldX = xExtent[0] + (x / (highResSize - 1)) * (xExtent[1] - xExtent[0]);
-            const worldY = yExtent[0] + (y / (highResSize - 1)) * (yExtent[1] - yExtent[0]);
+            const worldX = flipX ?
+                xExtent[1] - (x / (highResSize - 1)) * (xExtent[1] - xExtent[0]) :
+                xExtent[0] + (x / (highResSize - 1)) * (xExtent[1] - xExtent[0]);
+            const worldY = flipY ?
+                yExtent[1] - (y / (highResSize - 1)) * (yExtent[1] - yExtent[0]) :
+                yExtent[0] + (y / (highResSize - 1)) * (yExtent[1] - yExtent[0]);
             
             // Calculate density using distance-weighted influence
             let density = 0;
