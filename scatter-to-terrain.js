@@ -15,8 +15,8 @@ const TERRAIN_LEVELS = {
     ocean:     ELEVATION_LEVELS.ocean,     // -0.25
     shallow:   ELEVATION_LEVELS.shallow,   // -0.05
     valley:    ELEVATION_LEVELS.valley,    // +0.05
-    hills:     0.30,            // Moderate density -> hills
-    mountain:  0.40,            // High density -> mountains (capped lower than +1.0)
+    mountain:  0.55,            // High density -> mountains (capped lower than +1.0)
+    // mountain:  0.40,            // High density -> mountains (capped lower than +1.0)
 };
   
 function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY = true) {
@@ -119,7 +119,6 @@ function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY 
             // -0.25 to -0.05: Ocean (ELEVATION_LEVELS.ocean to ELEVATION_LEVELS.shallow)
             // -0.05 to  0.00: Shallow Water/Coast (ELEVATION_LEVELS.shallow to sea level)
             //  0.00 to +0.05: Plains (sea level to ELEVATION_LEVELS.valley - most terrain settles here)
-            // +0.05 to +0.30: Low Hills/Valleys (ELEVATION_LEVELS.valley to hills)
             // +0.30 to +0.75: Hills to Mountains (moderate to high density)
             
             // Convert density to elevation range
@@ -129,7 +128,7 @@ function createConstraintGrid(scatterData, gridSize = 128, flipX = false, flipY 
             
             // Apply very aggressive scaling to push most values down to valley level
             // Use a high power function to create extreme contrast
-            const scalingPower = 5.0; // Much higher power for extreme scaling
+            const scalingPower = 12.0; // Much higher power for extreme scaling
             let scaledDensity = Math.pow(normalizedDensity, scalingPower);
             
             // Scale to terrain range: most terrain at valley level, peaks at mountain level
