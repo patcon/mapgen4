@@ -3,6 +3,9 @@
     "version": "2.0.0",
     "private": true,
     "type": "module",
+    "scripts": {
+        "start": "sh build.sh && npx serve ."
+    },
     "dependencies": {
         "@redblobgames/prng": "https://github.com/redblobgames/prng",
         "delaunator": "^5",
