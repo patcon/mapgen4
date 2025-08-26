@@ -141,6 +141,56 @@ function main({mesh, t_peaks}: { mesh: Mesh; t_peaks: number[]; }) {
         };
         render.updateView(param.render);
     }
+
+    function importTerrain() {  
+        const fileInput = document.getElementById('file-input-terrain');  
+        fileInput.click();  
+    }  
+      
+    function handleTerrainFile(event) {  
+        const file = event.target.files[0];  
+        if (!file) return;  
+          
+        const reader = new FileReader();  
+        reader.onload = function(e) {  
+            try {  
+                const terrainData = JSON.parse(e.target.result);  
+                  
+                // Validate the imported data  
+                if (!terrainData.constraints || !terrainData.size || terrainData.size !== Painting.size) {  
+                    alert('Invalid terrain file format');  
+                    return;  
+                }  
+                  
+                // Load the constraints into the painting system  
+                Painting.constraints.set(terrainData.constraints);  
+                  
+                // Update parameters if they exist  
+                if (terrainData.seed !== undefined) {  
+                    param.elevation.seed = terrainData.seed;  
+                    document.querySelector("#slider-seed input").value = terrainData.seed;  
+                }  
+                if (terrainData.island !== undefined) {  
+                    param.elevation.island = terrainData.island;  
+                    document.querySelector("#slider-island input").value = terrainData.island;  
+                }  
+                  
+                // Mark as user painted and regenerate  
+                Painting.setElevationParam(param.elevation);  
+                generate();  
+                  
+            } catch (error) {  
+                alert('Error reading terrain file: ' + error.message);  
+            }  
+        };  
+        reader.readAsText(file);  
+    }  
+      
+    // Add event listeners  
+    const importButton = document.getElementById('button-import-terrain');  
+    const fileInput = document.getElementById('file-input-terrain');  
+    if (importButton) importButton.addEventListener('click', importTerrain);  
+    if (fileInput) fileInput.addEventListener('change', handleTerrainFile);
     
     Painting.screenToWorldCoords = (coords) => {
         let out = render.screenToWorld(coords);
