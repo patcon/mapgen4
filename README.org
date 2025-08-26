@@ -8,6 +8,24 @@
 - run /fast/ enough to regenerate in real time as you paint terrain
 - look /pretty/ instead of generating realistic terrain
 
+* About this Fork
+
+This fork is intended to support work in the [[https://patcon.github.io/polislike-opinion-map-painting/][Polis Opinion Landscape Painter]]. The intent is for programatic creation of maps based on underlying scatter plot coordinates. It calculates land features based on density of points, loosely mapping elevation to [[https://d3js.org/d3-contour][contour plot polygons]].
+
+[[blah][https://i.imgur.com/MpDVdjD.jpeg]]
+
+There is a short-term goal and a long-term long:
+1. Short-term: Autogenerate map images from scatter plot coordinates based on density.
+2. Long-term: Isolate animated map-painting component to "auto-paint terrain" based on underlying plot contours, essentially creating an evolving landscape based on an evolution of a live polis-like dataset. ([[https://observablehq.com/@d3/contourdensity-linear-binning][example 1]], [[https://www.redblobgames.com/x/2218-mapgen4-animated/embed.html][example 2]])
+
+Features Added:
+- Introduces a custom JSON map definition format for import/export.
+- Adds Export/Import buttons in the web interface, or additional painting and inspection.
+- Adds features to web interface that allow programmatically generating a PNG export of a map canvas in a headless browser.
+- Various scripts
+    - for converting a set of plot coordinates to the JSON map format for import (input plot coordinate format is the one [[https://github.com/patcon/polislike-opinion-map-painting/blob/main/data/datasets/5-dimensions-scaling-delib/pacmap.json][used in Polis Opinion Landscape Painter]]
+    - for generating a PNG image in a headless way using NodeJS (potential for serveless edge function execution)
+
 [[https://www.redblobgames.com/maps/mapgen4/blog/screenshot15-small.jpg]]
 
 * Install
